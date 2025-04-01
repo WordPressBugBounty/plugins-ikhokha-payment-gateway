@@ -5,7 +5,7 @@
  * Description: Receive online payments using the iKhokha Payment Gateway.
  * Author: iKhokha
  * Author URI: https://www.ikhokha.com/
- * Version: 2.0.2
+ * Version: 2.0.4
  */
 
 if (!defined('ABSPATH')) {
@@ -258,11 +258,23 @@ function ikhokha_init_gateway_class() {
 			$resetDecimal = str_replace($getDecimal, '.', $getTotal); // replace decimal with .
 			$orderAmount = number_format($resetDecimal, 2, '.', ''); // limit value to 2 decimal places
 
+			$urlparts = parse_url(site_url());
+			$domain = $urlparts ['host'];
+			$return_url =  $this->get_return_url($order);	
+			if(!str_contains($return_url, $domain)){
+
+				if ( $order ) {
+					$return_url = $order->get_checkout_order_received_url();
+				} else {
+					$return_url = wc_get_endpoint_url( 'order-received', '', wc_get_checkout_url() ) ."/".$order_id."/?key=" . $order->get_order_key();
+				}
+			}
+
 			/* Payload Info */
 			$payload = array(
 				"amount" => round($orderAmount * 100),
 				"callbackUrl" => str_replace('http:', 'https:', add_query_arg(array('wc-api' => 'WC_iKhokha_Gateway', 'reference' => $order_id), home_url('/'))),
-				"successUrl" => $this->get_return_url($order),
+				"successUrl" => $return_url,
 				"failUrl" => $payment_page,
 				"test" => $mode,
 				"customerEmail" => $order->get_billing_email(),

@@ -5,8 +5,8 @@ Tags: woocommerce,payment gateway,ikhokha
 Requires at least: 5.6
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag:  2.0.2
-Version: 2.0.2
+Stable tag:  2.0.4
+Version: 2.0.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -141,6 +141,9 @@ You can now use the WooCommerce Block-Based Checkout when creating your checkout
 = 2.0.2 =
 * Miscellaneous fixes and important security updates
 
+= 2.0.3 =
+* Miscellaneous fixes and important security updates
+
 == Upgrade Notice ==
 = 1.0.0 =
 Initial Release
@@ -164,4 +167,7 @@ Instant EFT is a quick, safe and convenient way for online shoppers to make a pa
 You can now use the WooCommerce Block-Based Checkout when creating your checkout pages for your website.
 
 = 2.0.2 =
+* Miscellaneous fixes and important security updates
+
+= 2.0.3 =
 * Miscellaneous fixes and important security updates

@@ -5,7 +5,8 @@
  * Description: Receive online payments using the iKhokha Payment Gateway.
  * Author: iKhokha
  * Author URI: https://www.ikhokha.com/
- * Version: 2.0.4
+ * Version: 3.0.0
+ * Requires Plugins: woocommerce
  */
 
 if (!defined('ABSPATH')) {
@@ -49,12 +50,25 @@ if (!function_exists('ikhokha_add_gateway_class')) {
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* Plugin Init */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
-add_action('plugins_loaded', 'ikhokha_init_gateway_class');
 function ikhokha_init_gateway_class() {
 
 	class WC_iKhokha_Gateway extends WC_Payment_Gateway {
 
 		const IKHOKHA_API_ENDPOINT = 'https://api.ikhokha.com/ecomm/v1/';
+
+		public $id;
+		public $icon;
+		public $has_fields;
+		public $method_title;
+		public $method_description;
+		public $supports;
+		public $title;
+		public $description;
+		public $enabled;
+		public $testmode;
+		public $application_id;
+		public $application_secret;
+		public $site_name;
 
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 		/* Plugin Construct */
@@ -261,8 +275,7 @@ function ikhokha_init_gateway_class() {
 			$urlparts = parse_url(site_url());
 			$domain = $urlparts ['host'];
 			$return_url =  $this->get_return_url($order);	
-			if(!str_contains($return_url, $domain)){
-
+			if(strpos($return_url, $domain) === false){
 				if ( $order ) {
 					$return_url = $order->get_checkout_order_received_url();
 				} else {

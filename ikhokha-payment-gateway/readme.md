@@ -2,11 +2,11 @@
 
 Contributors: ikhokhasupport
 Tags: woocommerce,payment gateway,ikhokha
-Requires at least: 5.6
+Requires at least: 6.4
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag:  2.0.4
-Version: 2.0.4
+Stable tag:  3.0.0
+Version: 3.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,8 +14,8 @@ Accept Secure Credit and Debit Card Payments on Your WooCommerce Site
 
 == Minimum Requirements ==
 
-- WordPress 5.6
-- WooCommerce 5.2.3 or greater
+- WordPress 6.4
+- WooCommerce 8.3 or greater
 - PHP 7.4 or greater is recommended
 - MySQL 5.6 or greater is recommended
 
@@ -144,6 +144,9 @@ You can now use the WooCommerce Block-Based Checkout when creating your checkout
 = 2.0.3 =
 * Miscellaneous fixes and important security updates
 
+= 3.0.0 =
+* Minimum supported versions of WordPress and WooCommerce updated for PHP 8.3 compatibility.
+
 == Upgrade Notice ==
 = 1.0.0 =
 Initial Release
@@ -171,3 +174,6 @@ You can now use the WooCommerce Block-Based Checkout when creating your checkout
 
 = 2.0.3 =
 * Miscellaneous fixes and important security updates
+
+= 3.0.0 =
+* Minimum supported versions of WordPress and WooCommerce updated for PHP 8.3 compatibility.

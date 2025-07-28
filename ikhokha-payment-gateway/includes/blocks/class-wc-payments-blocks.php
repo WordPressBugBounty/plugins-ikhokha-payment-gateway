@@ -17,6 +17,7 @@ final class WC_Gateway_Block_Blocks_Support extends AbstractPaymentMethodType
      * @var WC_Gateway_Block
      */
     private $gateway;
+    protected $settings;
 
     /**
      * Payment method name/id/slug.

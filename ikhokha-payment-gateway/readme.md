@@ -3,10 +3,10 @@
 Contributors: ikhokhasupport
 Tags: woocommerce,payment gateway,ikhokha
 Requires at least: 6.4
-Tested up to: 6.6
+Tested up to: 6.8.3
 Requires PHP: 7.4
-Stable tag:  3.0.0
-Version: 3.0.0
+Stable tag:  3.0.2
+Version: 3.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -177,3 +177,9 @@ You can now use the WooCommerce Block-Based Checkout when creating your checkout
 
 = 3.0.0 =
 * Minimum supported versions of WordPress and WooCommerce updated for PHP 8.3 compatibility.
+
+= 3.0.1 =
+* Minimum supported versions of WordPress and WooCommerce updated for PHP 8.3.28 compatibility.
+
+= 3.0.2 =
+* Updated documentation for test card information

@@ -5,7 +5,7 @@
  * Description: Receive online payments using the iKhokha Payment Gateway.
  * Author: iKhokha
  * Author URI: https://www.ikhokha.com/
- * Version: 3.0.0
+ * Version: 3.0.2
  * Requires Plugins: woocommerce
  */
 
@@ -28,7 +28,8 @@ add_action('admin_init', function () {
 add_action('plugins_loaded', 'wc_ikhokha_gateway_init', 0);
 require_once plugin_dir_path(__FILE__) . "/includes/woocommerce-blocks-support.php";
 
-function wc_ikhokha_gateway_init() {
+function wc_ikhokha_gateway_init()
+{
 	if (!class_exists('WC_Payment_Gateway')) {
 		return;
 	}
@@ -41,7 +42,8 @@ function wc_ikhokha_gateway_init() {
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 if (!function_exists('ikhokha_add_gateway_class')) {
 	add_filter('woocommerce_payment_gateways', 'ikhokha_add_gateway_class');
-	function ikhokha_add_gateway_class($gateways) {
+	function ikhokha_add_gateway_class($gateways)
+	{
 		$gateways[] = 'WC_iKhokha_Gateway';
 		return $gateways;
 	}
@@ -50,9 +52,11 @@ if (!function_exists('ikhokha_add_gateway_class')) {
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* Plugin Init */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
-function ikhokha_init_gateway_class() {
+function ikhokha_init_gateway_class()
+{
 
-	class WC_iKhokha_Gateway extends WC_Payment_Gateway {
+	class WC_iKhokha_Gateway extends WC_Payment_Gateway
+	{
 
 		const IKHOKHA_API_ENDPOINT = 'https://api.ikhokha.com/ecomm/v1/';
 
@@ -73,7 +77,8 @@ function ikhokha_init_gateway_class() {
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 		/* Plugin Construct */
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
-		public function __construct() {
+		public function __construct()
+		{
 
 			$this->id = 'ikhokha'; // payment gateway plugin ID
 			$this->icon = plugins_url('assets/images/wc_ikhokha.png', __FILE__); // iKhokha logo
@@ -114,7 +119,8 @@ function ikhokha_init_gateway_class() {
 		/**
 		 * Plugin bootstrapping.
 		 */
-		public static function init() {
+		public static function init()
+		{
 
 			// Make the Payments gateway available to WC.
 			add_filter('woocommerce_payment_gateways', array(__CLASS__, 'add_gateway'));
@@ -125,7 +131,8 @@ function ikhokha_init_gateway_class() {
 		 *
 		 * @param array
 		 */
-		public static function add_gateway($gateways) {
+		public static function add_gateway($gateways)
+		{
 
 			$gateways[] = 'WC_iKhokha_Gateway';
 
@@ -135,7 +142,8 @@ function ikhokha_init_gateway_class() {
 		/**
 		 * Initialise Gateway Settings Form Fields.
 		 */
-		public function init_form_fields() {
+		public function init_form_fields()
+		{
 
 			$this->form_fields = array(
 				'enabled' => array(
@@ -160,7 +168,7 @@ function ikhokha_init_gateway_class() {
 				),
 				'testmode' => array(
 					'title' => 'Test mode',
-					'label' => 'Enable Test Mode (Use Card Number: 1111 1111 1111 1111 Expiry Month: 11 Expiry Year: 25 CVV: 111)',
+					'label' => 'Enable Test Mode (Use Card Number: 1111 1111 1111 1111 Expiry Month: 11 Expiry Year: 30 CVV: 111)',
 					'type' => 'checkbox',
 					'description' => 'Place the payment gateway in test mode and use the displayed test card details to conduct a test transaction. Note: Your website users will NOT be able to transact if this setting is enabled.',
 					'default' => 'no',
@@ -180,7 +188,8 @@ function ikhokha_init_gateway_class() {
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 		/* Checkout - Decide if we want to enable iKhokha on checkout */
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
-		public function ikhokha_disable_payment_rule($available_gateways) {
+		public function ikhokha_disable_payment_rule($available_gateways)
+		{
 
 			$currency = get_woocommerce_currency();
 
@@ -195,7 +204,8 @@ function ikhokha_init_gateway_class() {
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 		/* Getting the WooCommerce version*/
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-		public function wpbo_get_woo_version_number() {
+		public function wpbo_get_woo_version_number()
+		{
 			// If get_plugins() isn't available, require it
 			if (!function_exists('get_plugins')) {
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -217,7 +227,8 @@ function ikhokha_init_gateway_class() {
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 		/* Process Payment */
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
-		public function process_payment($order_id) {
+		public function process_payment($order_id)
+		{
 
 			global $woocommerce;
 			$order = new WC_Order($order_id);
@@ -231,7 +242,8 @@ function ikhokha_init_gateway_class() {
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 		/* Order Receipt Page */
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
-		public function receipt_page($order) {
+		public function receipt_page($order)
+		{
 
 			echo $this->generate_post_form($order);
 		}
@@ -239,7 +251,8 @@ function ikhokha_init_gateway_class() {
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 		/* Payment Form & Submission */
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
-		public function generate_post_form($order_id) {
+		public function generate_post_form($order_id)
+		{
 
 			$order = new WC_Order($order_id);
 			$payment_page = $order->get_checkout_payment_url();
@@ -273,13 +286,13 @@ function ikhokha_init_gateway_class() {
 			$orderAmount = number_format($resetDecimal, 2, '.', ''); // limit value to 2 decimal places
 
 			$urlparts = parse_url(site_url());
-			$domain = $urlparts ['host'];
-			$return_url =  $this->get_return_url($order);	
-			if(strpos($return_url, $domain) === false){
-				if ( $order ) {
+			$domain = $urlparts['host'];
+			$return_url = $this->get_return_url($order);
+			if (strpos($return_url, $domain) === false) {
+				if ($order) {
 					$return_url = $order->get_checkout_order_received_url();
 				} else {
-					$return_url = wc_get_endpoint_url( 'order-received', '', wc_get_checkout_url() ) ."/".$order_id."/?key=" . $order->get_order_key();
+					$return_url = wc_get_endpoint_url('order-received', '', wc_get_checkout_url()) . "/" . $order_id . "/?key=" . $order->get_order_key();
 				}
 			}
 
@@ -349,7 +362,8 @@ function ikhokha_init_gateway_class() {
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 		/* Generate Signature */
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
-		public function generate_signature($payload) {
+		public function generate_signature($payload)
+		{
 
 			$signature = false; // default to false
 
@@ -366,7 +380,8 @@ function ikhokha_init_gateway_class() {
 		/* Auth / Post payload */
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-		public function ikhokha_order_auth($payload) {
+		public function ikhokha_order_auth($payload)
+		{
 
 			$signature = self::generate_signature($payload);
 			if ($signature) {
@@ -402,7 +417,8 @@ function ikhokha_init_gateway_class() {
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 		/* Generate a signature for the WC Endpoint */
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
-		public function generate_callback_signature($payload) {
+		public function generate_callback_signature($payload)
+		{
 
 			$signature = false; // default to false
 
@@ -418,7 +434,8 @@ function ikhokha_init_gateway_class() {
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 		/* WC Endpoint - Process response */
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
-		public function ikhokha_process_response() {
+		public function ikhokha_process_response()
+		{
 
 			$check = false;
 
@@ -523,7 +540,8 @@ function ikhokha_init_gateway_class() {
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 		/* Generate Refund Signatue */
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
-		public function generate_refund_signature($refund_payload, $order_id) {
+		public function generate_refund_signature($refund_payload, $order_id)
+		{
 
 			$refund_signature = false; // default to false
 
@@ -537,7 +555,7 @@ function ikhokha_init_gateway_class() {
 					$transaction_id = $getData['transactionId'];
 				}
 
-				if(empty($transaction_id)){
+				if (empty($transaction_id)) {
 					$payment_url = get_post_meta($order_id, 'ikhokha_payment_url', true);
 					$arr_payment = explode("/", $payment_url);
 					$arr_payment_reversed = array_reverse($arr_payment);
@@ -554,7 +572,8 @@ function ikhokha_init_gateway_class() {
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 		/* Process Refund */
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
-		public function process_refund($order_id, $amount = null, $reason = '') {
+		public function process_refund($order_id, $amount = null, $reason = '')
+		{
 
 			$convert = round($amount * 100);
 
@@ -575,13 +594,13 @@ function ikhokha_init_gateway_class() {
 					$transaction_id = $getData['transactionId'];
 				}
 
-				if(empty($transaction_id)){
+				if (empty($transaction_id)) {
 					$payment_url = get_post_meta($order_id, 'ikhokha_payment_url', true);
 					$arr_payment = explode("/", $payment_url);
 					$arr_payment_reversed = array_reverse($arr_payment);
 					$transaction_id = $arr_payment_reversed[0];
 				}
-				$refund_url_full =  "https://api.ikhokha.com/ecomm/$transaction_id/refunds";
+				$refund_url_full = "https://api.ikhokha.com/ecomm/$transaction_id/refunds";
 
 				$args = [
 					'method' => 'POST',
@@ -629,7 +648,8 @@ function ikhokha_init_gateway_class() {
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 if (!function_exists('wc_ikhokha_settings_link')) {
 	add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'wc_ikhokha_settings_link');
-	function wc_ikhokha_settings_link($links) {
+	function wc_ikhokha_settings_link($links)
+	{
 		$settings_link = '<a href="admin.php?page=wc-settings&tab=checkout&section=ikhokha">Settings</a>';
 		array_unshift($links, $settings_link);
 		return $links;
@@ -641,7 +661,8 @@ if (!function_exists('wc_ikhokha_settings_link')) {
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 if (!function_exists('ikhokha_meta_data')) {
 	add_action('add_meta_boxes', 'ikhokha_meta_data');
-	function ikhokha_meta_data() {
+	function ikhokha_meta_data()
+	{
 		add_meta_box('ikhokha_meta_data', __('iKhokha Data', 'woocommerce'), 'ikhokha_meta_data_display', 'shop_order', 'side', 'core');
 	}
 }
@@ -650,7 +671,8 @@ if (!function_exists('ikhokha_meta_data')) {
 /* Add Meta Section Display */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 if (!function_exists('ikhokha_meta_data_display')) {
-	function ikhokha_meta_data_display() {
+	function ikhokha_meta_data_display()
+	{
 
 		global $post;
 		$getData = get_post_meta($post->ID, 'ikhokha_data', true) ? get_post_meta($post->ID, 'ikhokha_data', true) : '';

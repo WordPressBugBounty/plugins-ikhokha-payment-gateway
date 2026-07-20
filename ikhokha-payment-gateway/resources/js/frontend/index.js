@@ -1,5 +1,4 @@
-
-import { sprintf, __ } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 import { decodeEntities } from '@wordpress/html-entities';
 import { getSetting } from '@woocommerce/settings';
@@ -7,40 +6,55 @@ import { getSetting } from '@woocommerce/settings';
 const settings = getSetting( 'ikhokha_data', {} );
 
 const defaultLabel = __(
-	'iKhokha Payment Gateway',
-	'woo-gutenberg-products-block'
+    'iKhokha Payment Gateway',
+    'woo-gutenberg-products-block'
 );
 
 const label = decodeEntities( settings.title ) || defaultLabel;
+const logoUrl = settings.logo_url;
+
 /**
  * Content component
  */
 const Content = () => {
-	return decodeEntities( settings.description || '' );
+    return decodeEntities( settings.description || '' );
 };
+
 /**
  * Label component
- *
- * @param {*} props Props from payment API.
  */
-const Label = ( props ) => {
-	const { PaymentMethodLabel } = props.components;
-	return <PaymentMethodLabel text={ label } />;
+const Label = () => {
+    return (
+        <span style={{ 
+            display: 'flex', 
+            flexDirection: 'row', 
+            flexWrap: 'nowrap', 
+            justifyContent: 'center', 
+            alignItems: 'center' 
+        }}>
+            <img 
+                src={ logoUrl } 
+                alt={ label } 
+                style={{ maxHeight: '20px', marginLeft: '0.5em' }} 
+            />
+            { label }
+        </span>
+    );
 };
 
 /**
- * Dummy payment method config object.
+ * Payment method config object.
  */
-const Dummy = {
-	name: "ikhokha",
-	label: <Label />,
-	content: <Content />,
-	edit: <Content />,
-	canMakePayment: () => true,
-	ariaLabel: label,
-	supports: {
-		features: settings.supports,
-	},
+const Config = {
+    name: "ikhokha",
+    label: <Label />,
+    content: <Content />,
+    edit: <Content />,
+    canMakePayment: () => true,
+    ariaLabel: labelText,
+    supports: {
+        features: settings.supports,
+    },
 };
 
-registerPaymentMethod( Dummy );
+registerPaymentMethod( Config );

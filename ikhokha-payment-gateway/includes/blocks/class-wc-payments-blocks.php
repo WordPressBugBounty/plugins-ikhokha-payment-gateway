@@ -78,7 +78,8 @@ final class WC_Gateway_Block_Blocks_Support extends AbstractPaymentMethodType
         return [
             'title'       => $this->get_setting('title'),
             'description' => $this->get_setting('description'),
-            'supports'    => array_filter($this->gateway->supports, [$this->gateway, 'supports'])
+            'supports'    => array_filter($this->gateway->supports, [$this->gateway, 'supports']),
+			'logo_url'		=> WC_Block_Payments::plugin_url() . '/assets/images/wc_ikhokha.png'
         ];
     }
 }

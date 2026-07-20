@@ -5,7 +5,7 @@
  * Description: Receive online payments using the iKhokha Payment Gateway.
  * Author: iKhokha
  * Author URI: https://www.ikhokha.com/
- * Version: 3.0.2
+ * Version: 3.0.3
  * Requires Plugins: woocommerce
  */
 

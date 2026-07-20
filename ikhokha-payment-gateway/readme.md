@@ -3,10 +3,10 @@
 Contributors: ikhokhasupport
 Tags: woocommerce,payment gateway,ikhokha
 Requires at least: 6.4
-Tested up to: 6.8.3
+Tested up to: 6.9.4
 Requires PHP: 7.4
-Stable tag:  3.0.2
-Version: 3.0.2
+Stable tag:  3.0.3
+Version: 3.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -147,6 +147,11 @@ You can now use the WooCommerce Block-Based Checkout when creating your checkout
 = 3.0.0 =
 * Minimum supported versions of WordPress and WooCommerce updated for PHP 8.3 compatibility.
 
+= 3.0.3 =
+* Fix for block checkout rules ensuring the iKhokha logo displays when a block theme is applied and ZAR is set as the currency of choice.
+* HPOS-compliant fixes to resolve "Pending Payment" or "Processing" status updates when payment successful.
+* Standardized one correct text domain across all PHP and JS files.
+
 == Upgrade Notice ==
 = 1.0.0 =
 Initial Release
@@ -183,3 +188,8 @@ You can now use the WooCommerce Block-Based Checkout when creating your checkout
 
 = 3.0.2 =
 * Updated documentation for test card information
+
+= 3.0.3 =
+* Fix for block checkout rules ensuring the iKhokha logo displays when a block theme is applied and ZAR is set as the currency of choice.
+* HPOS-compliant fixes to resolve "Pending Payment" or "Processing" status updates when payment successful.
+* Standardized one correct text domain across all PHP and JS files.

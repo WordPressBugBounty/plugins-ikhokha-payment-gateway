@@ -5,7 +5,7 @@
  * Description: Receive online payments using the iKhokha Payment Gateway.
  * Author: iKhokha
  * Author URI: https://www.ikhokha.com/
- * Version: 3.0.3
+ * Version: 3.0.4
  * Requires Plugins: woocommerce
  */
 
@@ -110,10 +110,24 @@ function ikhokha_init_gateway_class()
 			// Actions
 			add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options')); // save admin options
 			add_action('woocommerce_receipt_' . $this->id, array($this, 'receipt_page'));
-			add_action('woocommerce_api_' . strtolower(get_class($this)), array($this, 'ikhokha_process_response')); // API endpoint
+
+			// Register callback endpoint only when gateway is enabled and configured
+			if ('yes' === $this->enabled && $this->is_configured()) {
+				add_action('woocommerce_api_' . strtolower(get_class($this)), array($this, 'ikhokha_process_response')); // API endpoint
+			}
 
 			// disable payment based on rules
 			add_filter('woocommerce_available_payment_gateways', array($this, 'ikhokha_disable_payment_rule'));
+		}
+
+		/**
+		 * Check if the gateway has required credentials configured.
+		 *
+		 * @return bool
+		 */
+		public function is_configured()
+		{
+			return !empty($this->application_id) && !empty($this->application_secret);
 		}
 
 		/**
@@ -288,18 +302,33 @@ function ikhokha_init_gateway_class()
 			$urlparts = parse_url(site_url());
 			$domain = $urlparts['host'];
 			$return_url = $this->get_return_url($order);
-			if (strpos($return_url, $domain) === false) {
-				if ($order) {
-					$return_url = $order->get_checkout_order_received_url();
-				} else {
-					$return_url = wc_get_endpoint_url('order-received', '', wc_get_checkout_url()) . "/" . $order_id . "/?key=" . $order->get_order_key();
-				}
+			
+			$parsed = parse_url($return_url);
+			// If there is no host in the return URL
+			if (empty($parsed['host'])) {
+				// 1. Try to get host from site_url(), home option, or the server header
+				$host = !empty($_SERVER['HTTP_HOST']) 
+					? sanitize_text_field(wp_unslash($_SERVER['HTTP_HOST'])) 
+					: parse_url(get_option('siteurl'), PHP_URL_HOST);
+				// 2. Determine scheme (default to https for payment gateways)
+				$scheme = (is_ssl() || get_option('woocommerce_force_ssl_checkout') === 'yes') ? 'https' : 'http';
+				// 3. Prepend scheme and host to the relative path
+				$return_url = $scheme . '://' . $host . '/' . ltrim($return_url, '/');
 			}
 
 			/* Payload Info */
+			$callback_url = add_query_arg(
+				array(
+					'wc-api'    => 'WC_iKhokha_Gateway',
+					'reference' => $order_id,
+					'order_key' => $order->get_order_key(),
+				),
+				home_url('/')
+			);
+
 			$payload = array(
 				"amount" => round($orderAmount * 100),
-				"callbackUrl" => str_replace('http:', 'https:', add_query_arg(array('wc-api' => 'WC_iKhokha_Gateway', 'reference' => $order_id), home_url('/'))),
+				"callbackUrl" => str_replace('http:', 'https:', $callback_url),
 				"successUrl" => $return_url,
 				"failUrl" => $payment_page,
 				"test" => $mode,
@@ -364,16 +393,12 @@ function ikhokha_init_gateway_class()
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 		public function generate_signature($payload)
 		{
-
-			$signature = false; // default to false
-
-			if (isset($payload) && !empty($payload) && $this->application_secret !== '') {
-
+			if (isset($payload) && !empty($payload) && !empty($this->application_secret)) {
 				$string = "/ecomm/v1/paymentlinks" . addslashes(json_encode($payload, JSON_UNESCAPED_SLASHES));
-				$signature = hash_hmac("sha256", $string, $this->application_secret);
-
-				return $signature;
+				return hash_hmac("sha256", $string, $this->application_secret);
 			}
+
+			return false;
 		}
 
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -414,21 +439,44 @@ function ikhokha_init_gateway_class()
 			}
 		}
 
+		/**
+		 * Safely retrieve a request header across different server environments.
+		 *
+		 * @param string $header_name
+		 * @return string
+		 */
+		private function get_request_header($header_name)
+		{
+			$server_key = 'HTTP_' . strtoupper(str_replace('-', '_', $header_name));
+			if (!empty($_SERVER[$server_key])) {
+				return trim(sanitize_text_field(wp_unslash($_SERVER[$server_key])));
+			}
+
+			if (function_exists('getallheaders')) {
+				$headers = getallheaders();
+				if (is_array($headers)) {
+					foreach ($headers as $key => $value) {
+						if (strcasecmp($key, $header_name) === 0) {
+							return trim(sanitize_text_field(wp_unslash($value)));
+						}
+					}
+				}
+			}
+
+			return '';
+		}
+
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 		/* Generate a signature for the WC Endpoint */
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 		public function generate_callback_signature($payload)
 		{
-
-			$signature = false; // default to false
-
-			if (isset($payload) && !empty($payload) && $this->application_secret !== '') {
-
+			if (isset($payload) && !empty($payload) && !empty($this->application_secret)) {
 				$string = "/" . addslashes(json_encode($payload, JSON_UNESCAPED_SLASHES));
-				$signature = hash_hmac("sha256", $string, $this->application_secret);
-
-				return $signature;
+				return hash_hmac("sha256", $string, $this->application_secret);
 			}
+
+			return false;
 		}
 
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -436,105 +484,182 @@ function ikhokha_init_gateway_class()
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
 		public function ikhokha_process_response()
 		{
+			// Fail closed if gateway is disabled or credentials are not configured
+			if ('yes' !== $this->enabled || !$this->is_configured()) {
+				status_header(403);
+				wp_die(__('iKhokha gateway is not enabled or properly configured.', 'ikhokha-payment-gateway'), 'iKhokha Payment Error', array('response' => 403));
+			}
 
-			$check = false;
-
-			// get data via post
+			// Extract payload
+			$data = null;
 			if (isset($_POST['status']) && !empty($_POST['status'])) {
-				$data = array('status' => sanitize_text_field($_POST['status']));
+				$data = array('status' => sanitize_text_field(wp_unslash($_POST['status'])));
 
-				// extra data
 				if (isset($_POST['transactionId']) && !empty($_POST['transactionId'])) {
-					$data['transactionId'] = sanitize_key($_POST['transactionId']);
+					$data['transactionId'] = sanitize_key(wp_unslash($_POST['transactionId']));
 				}
 				if (isset($_POST['responseCode']) && !empty($_POST['responseCode'])) {
-					$data['responseCode'] = sanitize_text_field($_POST['responseCode']);
+					$data['responseCode'] = sanitize_text_field(wp_unslash($_POST['responseCode']));
 				}
 				if (isset($_POST['responseMessage']) && !empty($_POST['responseMessage'])) {
-					$data['responseMessage'] = sanitize_text_field($_POST['responseMessage']);
+					$data['responseMessage'] = sanitize_text_field(wp_unslash($_POST['responseMessage']));
 				}
 			} else {
-				$data = json_decode(file_get_contents("php://input"), true);
+				$raw_body = file_get_contents("php://input");
+				if (!empty($raw_body)) {
+					$data = json_decode($raw_body, true);
+				}
 			}
 
-			// if we getting endpoint data
-			if (isset($data) && isset($_GET['reference']) && isset($data['status'])) {
+			if (!is_array($data) || empty($data['status'])) {
+				status_header(400);
+				wp_die(__('Invalid or missing callback payload.', 'ikhokha-payment-gateway'), 'iKhokha Payment Error', array('response' => 400));
+			}
 
-				// get headers
-				$headers = getallheaders();
-				$keys = array();
+			// Defensive header retrieval and verification
+			$header_sign  = $this->get_request_header('IK-SIGN');
+			$header_appid = $this->get_request_header('IK-APPID');
 
-				foreach ($headers as $headerKey => $headerValue) {
-					$keys[strtoupper($headerKey)] = $headerValue;
+			// Treat missing or empty headers as immediate hard failure
+			if (empty($header_sign) || empty($header_appid)) {
+				status_header(400);
+				wp_die(__('Missing required callback headers.', 'ikhokha-payment-gateway'), 'iKhokha Payment Error', array('response' => 400));
+			}
+
+			// Compare Application ID using timing-safe comparison
+			if (!hash_equals((string) $this->application_id, (string) $header_appid)) {
+				status_header(401);
+				wp_die(__('Unauthorized: Application ID mismatch.', 'ikhokha-payment-gateway'), 'iKhokha Payment Error', array('response' => 401));
+			}
+
+			// Generate and verify callback signature using timing-safe hash_equals
+			$expected_signature = self::generate_callback_signature($data);
+			if (empty($expected_signature) || !hash_equals((string) $expected_signature, (string) $header_sign)) {
+				status_header(401);
+				wp_die(__('Unauthorized: Invalid callback signature.', 'ikhokha-payment-gateway'), 'iKhokha Payment Error', array('response' => 401));
+			}
+
+			// Validate order reference parameter
+			if (!isset($_GET['reference'])) {
+				status_header(400);
+				wp_die(__('Missing order reference parameter.', 'ikhokha-payment-gateway'), 'iKhokha Payment Error', array('response' => 400));
+			}
+
+			$reference = sanitize_key(wp_unslash($_GET['reference']));
+			$order = wc_get_order(is_numeric($reference) ? (int) $reference : $reference);
+
+			if (!$order || !is_a($order, 'WC_Order')) {
+				status_header(404);
+				wp_die(__('Order not found.', 'ikhokha-payment-gateway'), 'iKhokha Payment Error', array('response' => 404));
+			}
+
+			// Bind callback to order by verifying order_key
+			$order_key = '';
+			if (!empty($_GET['order_key'])) {
+				$order_key = sanitize_text_field(wp_unslash($_GET['order_key']));
+			} elseif (!empty($data['order_key'])) {
+				$order_key = sanitize_text_field($data['order_key']);
+			} elseif (!empty($_POST['order_key'])) {
+				$order_key = sanitize_text_field(wp_unslash($_POST['order_key']));
+			}
+
+			if (empty($order_key) || !hash_equals((string) $order->get_order_key(), (string) $order_key)) {
+				status_header(401);
+				wp_die(__('Unauthorized: Invalid order key.', 'ikhokha-payment-gateway'), 'iKhokha Payment Error', array('response' => 401));
+			}
+
+			// Confirm order was placed using this gateway
+			if ($order->get_payment_method() !== $this->id) {
+				status_header(400);
+				wp_die(__('Order payment method does not match iKhokha.', 'ikhokha-payment-gateway'), 'iKhokha Payment Error', array('response' => 400));
+			}
+
+			// Verify currency is ZAR
+			if ($order->get_currency() !== 'ZAR') {
+				status_header(400);
+				wp_die(__('Invalid order currency.', 'ikhokha-payment-gateway'), 'iKhokha Payment Error', array('response' => 400));
+			}
+
+			// Verify reported currency if provided
+			$reported_currency = '';
+			if (!empty($data['currency'])) {
+				$reported_currency = $data['currency'];
+			} elseif (!empty($_POST['currency'])) {
+				$reported_currency = sanitize_text_field(wp_unslash($_POST['currency']));
+			}
+
+			if (!empty($reported_currency) && strtoupper($reported_currency) !== strtoupper($order->get_currency())) {
+				status_header(400);
+				wp_die(__('Reported currency does not match order currency.', 'ikhokha-payment-gateway'), 'iKhokha Payment Error', array('response' => 400));
+			}
+
+			// Verify reported amount if provided
+			$reported_amount = null;
+			if (isset($data['amount'])) {
+				$reported_amount = $data['amount'];
+			} elseif (isset($_POST['amount'])) {
+				$reported_amount = sanitize_text_field(wp_unslash($_POST['amount']));
+			}
+
+			if ($reported_amount !== null && $reported_amount !== '') {
+				$reported_float    = (float) $reported_amount;
+				$order_total       = (float) $order->get_total();
+				$order_total_cents = round($order_total * 100);
+
+				$matches_cents = abs($reported_float - $order_total_cents) < 0.01;
+				$matches_total = abs($reported_float - $order_total) < 0.01;
+
+				if (!$matches_cents && !$matches_total) {
+					status_header(400);
+					wp_die(__('Reported payment amount does not match order total.', 'ikhokha-payment-gateway'), 'iKhokha Payment Error', array('response' => 400));
 				}
+			}
 
-				// generate signature
-				$signature = self::generate_callback_signature($data);
+			// Process order status safely
+			$order_is_paid      = $order->has_status(array('processing', 'completed'));
+			$transaction_status = strtolower($data['status']);
 
-				// if the generated signature does not match the signature received in header return 500 error
-				if ($signature !== $keys['IK-SIGN']) {
-					status_header(500, "HTTP/1.1 500 Internal Server Error");
-					die();
-				}
+			if (!$order_is_paid && 'success' === $transaction_status) {
+				$transaction_id = !empty($data['transactionId']) ? $data['transactionId'] : '';
 
-				if ($this->application_id !== $keys['IK-APPID']) {
-					status_header(500, "HTTP/1.1 500 Internal Server Error");
-					die();
-				}
-
-				// set reference and ensure it returns as a number
-				$reference = sanitize_key($_GET['reference']);
-				if (!is_numeric($reference)) {
-					$reference = +$reference;
-				}
+				$order->update_meta_data('ikhokha_data', $data);
+				$order->payment_complete($transaction_id);
+				$order->add_order_note(
+					sprintf(
+						/* translators: 1: Currency, 2: Amount */
+						__('%1$s %2$s was successfully processed through iKhokha', 'ikhokha-payment-gateway'),
+						$order->get_currency(),
+						$order->get_total()
+					)
+				);
+				$order->save();
 
 				global $woocommerce;
-				$order = new WC_Order($reference);
-
-				$orderStatus = $order->get_status();
-
-				$transactionStatus = strtolower($data['status']);
-
-				// if we waiting for a payment
-				// if order status is success from api endpoint we mark the order as processing in WC
-				if ($orderStatus != 'processing' && $transactionStatus == 'success') {
-
-					status_header(200);
-
-					$order->update_status('processing', sprintf(__('%s %s was successfully processed through iKhokha', 'ikhokha-payment-gateway'), get_woocommerce_currency(), $order->get_total()));
-					$order->payment_complete();
-					wc_reduce_stock_levels($order->get_id());
-
-					$order->update_meta_data('ikhokha_data', $data);
-					$order->save();
-
+				if (isset($woocommerce->cart) && is_object($woocommerce->cart)) {
 					$woocommerce->cart->empty_cart();
-
-					$check = true;
-				} else if ($orderStatus != 'processing' && $transactionStatus == 'failed') {
-
-					status_header(200);
-					$order->update_status('failed', sprintf(__('%s %s failed to connect through iKhokha', 'ikhokha-payment-gateway'), get_woocommerce_currency(), $order->get_total()));
 				}
+
+				status_header(200);
+				wp_send_json(array('status' => true));
+			} elseif (!$order_is_paid && 'failed' === $transaction_status) {
+				$order->update_meta_data('ikhokha_data', $data);
+				$order->update_status(
+					'failed',
+					sprintf(
+						/* translators: 1: Currency, 2: Amount */
+						__('%1$s %2$s payment failed through iKhokha', 'ikhokha-payment-gateway'),
+						$order->get_currency(),
+						$order->get_total()
+					)
+				);
+				$order->save();
+
+				status_header(200);
+				wp_send_json(array('status' => true));
 			} else {
-
-				// if no api data
-				status_header(500, "HTTP/1.1 500 Internal Server Error");
-				die();
+				status_header(200);
+				wp_send_json(array('status' => true, 'message' => 'Order state already finalized or unchanged.'));
 			}
-
-			if (!$check) {
-				status_header(500, "HTTP/1.1 500 Internal Server Error");
-				die();
-			}
-
-			$return = array(
-				'status' => $check,
-			);
-
-			print_r($return);
-
-			die();
 		}
 
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -545,7 +670,7 @@ function ikhokha_init_gateway_class()
 
 			$refund_signature = false; // default to false
 
-			if (isset($refund_payload) && !empty($refund_payload) && $this->application_secret !== '') {
+			if (isset($refund_payload) && !empty($refund_payload) && !empty($this->application_secret)) {
 
 				$transaction_id = null;
 
@@ -567,6 +692,8 @@ function ikhokha_init_gateway_class()
 
 				return $refund_signature;
 			}
+
+			return false;
 		}
 
 		/* ~~~~~~~~~~~~~~~~~~~~~~~~~ */

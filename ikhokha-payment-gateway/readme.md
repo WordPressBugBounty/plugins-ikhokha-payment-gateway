@@ -3,10 +3,10 @@
 Contributors: ikhokhasupport
 Tags: woocommerce,payment gateway,ikhokha
 Requires at least: 6.4
-Tested up to: 6.9.4
+Tested up to: 7.1.3
 Requires PHP: 7.4
-Stable tag:  3.0.3
-Version: 3.0.3
+Stable tag: 3.0.4
+Version: 3.0.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,10 +25,10 @@ The future of business is digital. That’s why we’ve developed a better way f
 
 WHY CHOOSE iKHOKHA’S PAYMENT GATEWAY?
 
-* No monthly fees or set up costs
-* 2.85% (Excl. VAT) transaction rate
-* Accept credit card, debit card and Instant EFT payments
-* 3D secure & PCI compliant
+- No monthly fees or set up costs
+- 2.85% (Excl. VAT) transaction rate
+- Accept credit card, debit card and Instant EFT payments
+- 3D secure & PCI compliant
 
 HOW TO GET STARTED
 
@@ -37,7 +37,7 @@ If you are an **existing iKhokha merchant / customer**, follow these installatio
 1. Install and activate iKhokha’s WooCommerce payment plugin
 2. Visit [your iKhokha Profile](https://dashboard.ikhokha.com)
 3. Log into your Dashboard.
-4. Click on the “Payment Options” menu and then click the “Online shop payments” and then select  “Generate New Key” next to “WordPress Plugin” from the options available
+4. Click on the “Payment Options” menu and then click the “Online shop payments” and then select “Generate New Key” next to “WordPress Plugin” from the options available
 5. Copy the displayed Application ID and Application Secret keys and paste them into the Application ID and Application Secret fields in the plugin configuration screen within the WordPress / WooCommerce back office
 6. Enable test mode and perform a test transaction
 7. Finally, disable test mode and you are ready to accept payments!
@@ -71,7 +71,6 @@ Benefits of WooCommerce Refunds:
 
 For more info on how to perform a refund, visit the iKhokha Help Centre by clicking [here](https://help.ikhokha.com/woocommerce-refunds).
 
-
 ABOUT IKHOKHA
 
 iKhokha is a fintech company that develops digital tools to help entrepreneurs start, grow and manage their business.
@@ -84,13 +83,13 @@ We also highly recommend that you use the latest WooCommerce and WordPress versi
 
 In order to install the payment plugin, follow the steps below:
 
-* Log in to your WordPress website’s admin dashboard
-* Navigate to Plugins and select Add New
-* Search for ”iKhokha Payment Gateway” in the plugin search bar
-* Install and activate the plugin
-* Once you’ve installed the plugin, generate and copy your Application ID and Secret ID keys from [your iKhokha Dashboard](https://dashboard.ikhokha.com) and paste them into the Application ID and Secret ID fields in your plugin settings.
+- Log in to your WordPress website’s admin dashboard
+- Navigate to Plugins and select Add New
+- Search for ”iKhokha Payment Gateway” in the plugin search bar
+- Install and activate the plugin
+- Once you’ve installed the plugin, generate and copy your Application ID and Secret ID keys from [your iKhokha Dashboard](https://dashboard.ikhokha.com) and paste them into the Application ID and Secret ID fields in your plugin settings.
 
-For more detailed steps, visit  [iK Pay Online](https://www.ikhokha.com/pay-online).
+For more detailed steps, visit [iK Pay Online](https://www.ikhokha.com/pay-online).
 
 **If you are NOT an existing iKhokha merchant / customer**, please:
 
@@ -101,13 +100,13 @@ After registering, the iKhokha Activations Team will perform a few checks and on
 
 == Frequently Asked Questions ==
 
-* What happens after I register as a new iKhokha merchant / customer? After registering, iKhokha’s Activations Team will perform a few checks and onboard you to our online payment platform. We will then be in touch to supply you with the installation steps.
-* What happens after I have installed and enabled the plugin?  After you have integrated iKhokha’s WooCommerce payment gateway plugin into your online store, your customer will see a new iKhokha payment method on your checkout page. When your customers select it, they will be redirected to a secure and PCI compliant iKhokha payment page.
-* How do I get paid? All payments are linked to your existing iKhokha account. The money will be paid out within 2 business days as part of your usual settlements.
-* What cards are accepted? Visa and Mastercard credit and debit cards are accepted.
-* What currencies are accepted? iKhokha currently accepts payments in South African Rands (ZAR)
-* Where do I get support? If you are having any issues, please contact our support team on 087 222 7000 or support@ikhokha.com
-* Can I perform refunds? Yes! You can complete the refund transaction from your WooCommerce dashboard and have the order updated automatically
+- What happens after I register as a new iKhokha merchant / customer? After registering, iKhokha’s Activations Team will perform a few checks and onboard you to our online payment platform. We will then be in touch to supply you with the installation steps.
+- What happens after I have installed and enabled the plugin? After you have integrated iKhokha’s WooCommerce payment gateway plugin into your online store, your customer will see a new iKhokha payment method on your checkout page. When your customers select it, they will be redirected to a secure and PCI compliant iKhokha payment page.
+- How do I get paid? All payments are linked to your existing iKhokha account. The money will be paid out within 2 business days as part of your usual settlements.
+- What cards are accepted? Visa and Mastercard credit and debit cards are accepted.
+- What currencies are accepted? iKhokha currently accepts payments in South African Rands (ZAR)
+- Where do I get support? If you are having any issues, please contact our support team on 087 222 7000 or support@ikhokha.com
+- Can I perform refunds? Yes! You can complete the refund transaction from your WooCommerce dashboard and have the order updated automatically
 
 == Screenshots ==
 
@@ -115,81 +114,102 @@ After registering, the iKhokha Activations Team will perform a few checks and on
 2. iK Payment Gateway Plugin Settings
 3. iK Payment Gateway Refunds
 
-
 == Changelog ==
 = 1.0.0 =
 
-* Initial Release.
+- Initial Release.
 
 = 1.1.0 =
-* NEW: Refunds
+
+- NEW: Refunds
   If your online shopper changes their mind about a purchase, it's no problem! You can now process partial and full refunds for your customers quickly and easily from your WooCommerce dashboard.
 
 = 1.1.8 =
-* NEW: Instant EFT
+
+- NEW: Instant EFT
 
 Instant EFT is a quick, safe and convenient way for online shoppers to make a payment from their bank account that clears immediately.
 
 = 1.1.11 =
-* Miscellaneous fixes and important security updates
+
+- Miscellaneous fixes and important security updates
 
 = 2.0.1 =
-* NEW: Block-Based checkout
+
+- NEW: Block-Based checkout
 
 You can now use the WooCommerce Block-Based Checkout when creating your checkout pages for your website.
 
 = 2.0.2 =
-* Miscellaneous fixes and important security updates
+
+- Miscellaneous fixes and important security updates
 
 = 2.0.3 =
-* Miscellaneous fixes and important security updates
+
+- Miscellaneous fixes and important security updates
 
 = 3.0.0 =
-* Minimum supported versions of WordPress and WooCommerce updated for PHP 8.3 compatibility.
+
+- Minimum supported versions of WordPress and WooCommerce updated for PHP 8.3 compatibility.
 
 = 3.0.3 =
-* Fix for block checkout rules ensuring the iKhokha logo displays when a block theme is applied and ZAR is set as the currency of choice.
-* HPOS-compliant fixes to resolve "Pending Payment" or "Processing" status updates when payment successful.
-* Standardized one correct text domain across all PHP and JS files.
+
+- Fix for block checkout rules ensuring the iKhokha logo displays when a block theme is applied and ZAR is set as the currency of choice.
+- HPOS-compliant fixes to resolve "Pending Payment" or "Processing" status updates when payment successful.
+- Standardized one correct text domain across all PHP and JS files.
 
 == Upgrade Notice ==
 = 1.0.0 =
 Initial Release
 
 = 1.1.0 =
-* NEW: Refunds
 
-If your online shopper changes their mind about a purchase, it's no problem! You can now process partial and full refunds for your customers quickly and easily from your WooCommerce dashboard. 
+- NEW: Refunds
+
+If your online shopper changes their mind about a purchase, it's no problem! You can now process partial and full refunds for your customers quickly and easily from your WooCommerce dashboard.
 
 = 1.1.8 =
-* NEW: Instant EFT
+
+- NEW: Instant EFT
 
 Instant EFT is a quick, safe and convenient way for online shoppers to make a payment from their bank account that clears immediately.
 
 = 1.1.11 =
-* Miscellaneous fixes and important security updates
+
+- Miscellaneous fixes and important security updates
 
 = 2.0.1 =
-* NEW: Block-Based checkout
+
+- NEW: Block-Based checkout
 
 You can now use the WooCommerce Block-Based Checkout when creating your checkout pages for your website.
 
 = 2.0.2 =
-* Miscellaneous fixes and important security updates
+
+- Miscellaneous fixes and important security updates
 
 = 2.0.3 =
-* Miscellaneous fixes and important security updates
+
+- Miscellaneous fixes and important security updates
 
 = 3.0.0 =
-* Minimum supported versions of WordPress and WooCommerce updated for PHP 8.3 compatibility.
+
+- Minimum supported versions of WordPress and WooCommerce updated for PHP 8.3 compatibility.
 
 = 3.0.1 =
-* Minimum supported versions of WordPress and WooCommerce updated for PHP 8.3.28 compatibility.
+
+- Minimum supported versions of WordPress and WooCommerce updated for PHP 8.3.28 compatibility.
 
 = 3.0.2 =
-* Updated documentation for test card information
+
+- Updated documentation for test card information
 
 = 3.0.3 =
-* Fix for block checkout rules ensuring the iKhokha logo displays when a block theme is applied and ZAR is set as the currency of choice.
-* HPOS-compliant fixes to resolve "Pending Payment" or "Processing" status updates when payment successful.
-* Standardized one correct text domain across all PHP and JS files.
+
+- Fix for block checkout rules ensuring the iKhokha logo displays when a block theme is applied and ZAR is set as the currency of choice.
+- HPOS-compliant fixes to resolve "Pending Payment" or "Processing" status updates when payment successful.
+- Standardized one correct text domain across all PHP and JS files.
+
+= 3.0.4 =
+
+- Fixes a critical security vulnerability where payment callbacks could be forged on unconfigured or default installations to manipulate order payment statuses. The callback endpoint now strictly fails closed if the gateway is disabled or credentials are missing, enforces defensive header extraction and timing-safe hash_equals signature verification, binds callbacks directly to orders via order_key validation, and ensures orders belong to iKhokha with matching currencies and totals before updating status.

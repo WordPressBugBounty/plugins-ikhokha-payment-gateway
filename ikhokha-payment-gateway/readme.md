@@ -5,8 +5,8 @@ Tags: woocommerce,payment gateway,ikhokha
 Requires at least: 6.4
 Tested up to: 7.1.3
 Requires PHP: 7.4
-Stable tag: 3.0.4
-Version: 3.0.4
+Stable tag: 3.0.5
+Version: 3.0.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -158,6 +158,15 @@ You can now use the WooCommerce Block-Based Checkout when creating your checkout
 - HPOS-compliant fixes to resolve "Pending Payment" or "Processing" status updates when payment successful.
 - Standardized one correct text domain across all PHP and JS files.
 
+= 3.0.4 =
+
+- Fixes a critical security vulnerability where payment callbacks could be forged on unconfigured or default installations to manipulate order payment statuses. The callback endpoint now strictly fails closed if the gateway is disabled or credentials are missing, enforces defensive header extraction and timing-safe hash_equals signature verification, binds callbacks directly to orders via order_key validation, and ensures orders belong to iKhokha with matching currencies and totals before updating status.
+
+= 3.0.5 =
+
+- Security & Payment Safety: Resolves cross-order callback reuse vulnerability by enforcing cryptographic/payload reference binding, store-wide transaction ID uniqueness, and idempotent replay handling. Callbacks attempting to reuse an existing transaction ID for a different order are rejected with HTTP 409 Conflict.
+- Integrity: Resolves false-positive success acknowledgments when WooCommerce rejects order payment completion. If WooCommerce payment_complete() is rejected, the gateway returns HTTP 500, suppresses the false success note, logs an alert note for manual reconciliation, and enables provider retry mechanisms.
+
 == Upgrade Notice ==
 = 1.0.0 =
 Initial Release
@@ -213,3 +222,7 @@ You can now use the WooCommerce Block-Based Checkout when creating your checkout
 = 3.0.4 =
 
 - Fixes a critical security vulnerability where payment callbacks could be forged on unconfigured or default installations to manipulate order payment statuses. The callback endpoint now strictly fails closed if the gateway is disabled or credentials are missing, enforces defensive header extraction and timing-safe hash_equals signature verification, binds callbacks directly to orders via order_key validation, and ensures orders belong to iKhokha with matching currencies and totals before updating status.
+
+= 3.0.5 =
+
+- Critical payment safety update: Prevents cross-order callback reuse, enforces transaction idempotency, and prevents false success notes on rejected order completions.
